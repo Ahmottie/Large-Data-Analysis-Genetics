@@ -15,7 +15,6 @@ head(data1)
 head(data2)
 head(data3)
 
-
 # ----------------------------------
 # Tidy data and transform data
 # ----------------------------------

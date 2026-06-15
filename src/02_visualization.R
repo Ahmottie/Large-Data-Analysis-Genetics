@@ -6,7 +6,7 @@ normalized_stats <- readRDS("./bin/normalized.rds")
 #=========================================
 # 3.2 Plotting the data
 #=========================================
-# x, y, and grouping/color by cell_line
+# x, y, and grouping by cell_line
 growth_plot <- ggplot(normalized_stats, aes(x = time, y = mean, color = cell_line)) +
 
   # a. Line plot styled by cell line
@@ -25,9 +25,10 @@ growth_plot <- ggplot(normalized_stats, aes(x = time, y = mean, color = cell_lin
     color = "Cell Line",
     linetype = "Cell Line"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  scale_color_brewer(palette = "Dark2")
 
 #=========================================
 # f. Export figure as PDF
 #=========================================
-ggsave("./results/faceted_growth_plot.pdf", plot = growth_plot, width = 10, height = 5, device = "pdf")
+ggsave("./results/plot.pdf", plot = growth_plot, width = 10, height = 5, device = "pdf")
