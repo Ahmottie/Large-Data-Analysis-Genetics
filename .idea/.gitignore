@@ -30,3 +30,12 @@ out/
 *.sqlite
 *.db
 *.sqlite3
+
+# Ignore specific data directory and CSV files
+data/
+*.csv
+
+# Standard R ignores
+.Rhistory
+.RData
+.Ruserdata
