@@ -27,4 +27,4 @@ normalized_stats <- stats %>%
 # Save processed statistics
 # ----------------------------------
 saveRDS(stats, "./bin/stats.rds")
-saveRDS(normalized_data, "./bin/normalized.rds")
+saveRDS(normalized_stats, "./bin/normalized.rds")
