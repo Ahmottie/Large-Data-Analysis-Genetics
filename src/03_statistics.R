@@ -61,3 +61,53 @@ ggsave("./results/box_plot.pdf", plot = box_plot, width = 10, height = 5, device
 
 # Tetraploidy has potentially a larger effect on the formation of micronucleai
 
+# Updated box plot with min/max whiskers and error bar caps
+box_plot <- ggplot(df, aes(x = condition, y = perc_micronuclei)) +
+  # 1. Add the error bar caps first so they render behind the box
+  # coef = Inf forces them to the absolute minimum and maximum values
+  stat_boxplot(geom = "errorbar", width = 0.2, coef = Inf) +
+
+  # 2. Add the box plot itself
+  # coef = Inf prevents individual outlier points from being drawn
+  geom_boxplot(fill = "lightblue", color = "black", coef = Inf) +
+
+  labs(title = "Distribution of Micronuclei Percentages",
+       x = "Cell Line Condition",
+       y = "Micronuclei per Observation (%)") +
+  theme_classic() +
+  # Applying the larger font sizes for consistency
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 14)
+  )
+
+print(box_plot)
+ggsave("./results/box2_plot.pdf", plot = box_plot, width = 10, height = 5, device = "pdf")
+
+
+# a. HCT116+APH vs HCT116 (Positive vs Negative Control)
+test_a <- t.test(perc_micronuclei ~ condition,
+                 data = subset(df, condition %in% c("HCT116+APH", "HCT116")),
+                 var.equal = FALSE)
+
+# b. Htr5 vs HCT116 (Aneuploid Model 1 vs Negative Control)
+test_b <- t.test(perc_micronuclei ~ condition,
+                 data = subset(df, condition %in% c("Htr5", "HCT116")),
+                 var.equal = FALSE)
+
+# c. Hte5 vs HCT116 (Aneuploid Model 2 vs Negative Control)
+test_c <- t.test(perc_micronuclei ~ condition,
+                 data = subset(df, condition %in% c("Hte5", "HCT116")),
+                 var.equal = FALSE)
+
+# d. HCT116+APH vs Hte5 (Positive Control vs Aneuploid Model 2)
+test_d <- t.test(perc_micronuclei ~ condition,
+                 data = subset(df, condition %in% c("HCT116+APH", "Hte5")),
+                 var.equal = FALSE)
+
+# Print the results to view the p-values and test statistics
+print(test_a)
+print(test_b)
+print(test_c)
+print(test_d)
