@@ -1,12 +1,9 @@
-# Load necessary libraries
 library(readxl)
 library(dplyr)
 library(tidyverse)
 
-# Read the data into a data frame
 df <- read_excel("data/aneuploid_micronuclei.xlsx")
 
-# Add the percentage of micronuclei per observation
 df <- df %>%
   mutate(perc_micronuclei = (micronuclei / nuclei) * 100)
 
@@ -20,14 +17,9 @@ df_summary <- df %>%
 
   )
 
-# View the results
 print(df_summary)
-
-
-# Load ggplot2 if not already loaded
 library(ggplot2)
 
-# Create the bar plot with error bars
 bar_plot <- ggplot(df_summary, aes(x = condition, y = mean_perc)) +
   geom_col(fill = "gray70", color = "black", width = 0.5) +
   geom_errorbar(aes(ymin = mean_perc - se_perc, ymax = mean_perc + se_perc),
@@ -46,36 +38,25 @@ bar_plot <- ggplot(df_summary, aes(x = condition, y = mean_perc)) +
 print(bar_plot)
 ggsave("./results/bar_plot.pdf", plot = bar_plot, width = 10, height = 5, device = "pdf")
 
+library(ggpubr)
 
-# Create the box plot
+comparisons <- list(
+  c("HCT116+APH", "HCT116"),
+  c("Htr5", "HCT116"),
+  c("Hte5", "HCT116"),
+  c("HCT116+APH", "Hte5")
+)
+# box plot
 box_plot <- ggplot(df, aes(x = condition, y = perc_micronuclei)) +
-  geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Distribution of Micronuclei Percentages",
-       x = "Cell Line Condition",
-       y = "Micronuclei per Observation (%)") +
-  theme_classic()
-
-print(box_plot)
-ggsave("./results/box_plot.pdf", plot = box_plot, width = 10, height = 5, device = "pdf")
-
-
-# Tetraploidy has potentially a larger effect on the formation of micronucleai
-
-# Updated box plot with min/max whiskers and error bar caps
-box_plot <- ggplot(df, aes(x = condition, y = perc_micronuclei)) +
-  # 1. Add the error bar caps first so they render behind the box
-  # coef = Inf forces them to the absolute minimum and maximum values
   stat_boxplot(geom = "errorbar", width = 0.2, coef = Inf) +
-
-  # 2. Add the box plot itself
-  # coef = Inf prevents individual outlier points from being drawn
-  geom_boxplot(fill = "lightblue", color = "black", coef = Inf) +
+  geom_boxplot(fill = "lightblue", color = "black", coef = Inf, width = 0.4) +
+  # t.test
+  stat_compare_means(comparisons = comparisons, method = "t.test", step.increase = 0.08) +
 
   labs(title = "Distribution of Micronuclei Percentages",
        x = "Cell Line Condition",
        y = "Micronuclei per Observation (%)") +
   theme_classic() +
-  # Applying the larger font sizes for consistency
   theme(
     plot.title = element_text(size = 16, face = "bold"),
     axis.text.x = element_text(size = 12),
@@ -83,8 +64,16 @@ box_plot <- ggplot(df, aes(x = condition, y = perc_micronuclei)) +
   )
 
 print(box_plot)
-ggsave("./results/box2_plot.pdf", plot = box_plot, width = 10, height = 5, device = "pdf")
 
+ggsave("./results/box_plot.pdf", plot = box_plot, width = 7, height = 6, device = "pdf")
+
+# log scale
+box_plot_log <- box_plot +
+  scale_y_continuous(trans = "log1p", breaks = c(0, 1, 2.5, 5, 7.5, 10)) +
+  labs(y = "Micronuclei per Observation (%) [Log Scale]")
+
+print(box_plot_log)
+ggsave("./results/box_plot_log.pdf", plot = box_plot_log, width = 7, height = 6, device = "pdf")
 
 # a. HCT116+APH vs HCT116 (Positive vs Negative Control)
 test_a <- t.test(perc_micronuclei ~ condition,
@@ -106,8 +95,18 @@ test_d <- t.test(perc_micronuclei ~ condition,
                  data = subset(df, condition %in% c("HCT116+APH", "Hte5")),
                  var.equal = FALSE)
 
-# Print the results to view the p-values and test statistics
+# Print the results
+print("HCT116+APH vs HCT116 (Positive vs Negative Control)")
 print(test_a)
+print("Htr5 vs HCT116 (Aneuploid Model 1 vs Negative Control)")
 print(test_b)
+print("Hte5 vs HCT116 (Aneuploid Model 2 vs Negative Control)")
 print(test_c)
+print("HCT116+APH vs Hte5 (Positive Control vs Aneuploid Model 2)")
 print(test_d)
+
+# Hte5 has significant increase in micronuclei. We can interperate that tetraploidi
+# has a more drastic effect on  the formation of micronucli in comparison to triploidi
+# Hte5 has a significant difference campred to negative
+# control by has the same approximate percentage of micronuclei
+# The Htr5 condition does not significantly increase the percentage of micronuclei
