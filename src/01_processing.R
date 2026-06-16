@@ -18,7 +18,7 @@ stats <- clean_data %>%
   )
 
 # b. Experimental differences in starting number of cells
-normalized_stats <- summary_stats %>%
+normalized_stats <- stats %>%
   group_by(experiment, cell_line) %>%
   mutate(mean = mean - min(mean)) %>%
   ungroup()
@@ -27,4 +27,4 @@ normalized_stats <- summary_stats %>%
 # Save processed statistics
 # ----------------------------------
 saveRDS(stats, "./bin/stats.rds")
-saveRDS(normalized_data, "./bin/normalized.rds")
+saveRDS(normalized_stats, "./bin/normalized.rds")
